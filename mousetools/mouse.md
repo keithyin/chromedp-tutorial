@@ -56,3 +56,26 @@ TiltX, TiltY: ???
 鼠标滑轮滚动：
 1. 设置 Type = MousePressed 
 2. 设置 DeltaX, DeltaY, 然后不停的 Do 就可以了！
+
+参数中有 X，Y值需要设置，那么如果想要点击某个 元素时，如何获得元素的位置呢？ `dom.GetContentQuads().WithNodeID(id).Do(ctx)`
+```golang
+// 找到 sel 节点后，会之后 func 里面指定的操作。
+chromedp.QueryAfter(sel, func(ctx context.Context, id runtime.ExecutionContextID, node ...*cdp.Node) error {
+		if len(node) == 0 {
+			fmt.Println("找不到相应node")
+			return fmt.Errorf("找不到相关 Node")
+		}
+        // 获取节点的 坐标 quads里面四个值，分别是 左上X，左上Y，右下X，右下Y
+        quads, err := dom.GetContentQuads().WithNodeID(node[0].NodeID).Do(ctx)
+        return err
+	})
+```
+
+## 其它
+获取selector所选定的所有节点的 Text
+
+```golang
+texts := make([]string, 0)
+chromedp.Evaluate(`[...document.querySelectorAll('#tags li')].map((e) => e.innerText)`, &texts)
+// https://github.com/chromedp/chromedp/issues/87
+```
